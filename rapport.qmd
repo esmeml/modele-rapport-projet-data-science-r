@@ -1,0 +1,370 @@
+---
+title: "Titre qui énonce la question étudiée"
+subtitle: "Projet n° X — Data Science sous R (ESME, 2026-2027)"
+author:
+  - Prénom NOM
+  - Prénom NOM
+  - Prénom NOM
+  - Prénom NOM
+date: today
+date-format: "D MMMM YYYY"
+lang: fr
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    code-fold: true
+    code-tools: true
+    embed-resources: true
+    fig-width: 7
+    fig-height: 4.5
+    theme: cosmo
+  # Version PDF facultative (nécessite LaTeX, par exemple tinytex::install_tinytex()) :
+  # supprimer le « # » des deux lignes suivantes, puis produire le document.
+  # pdf:
+  #   toc: true
+execute:
+  echo: true
+  warning: false
+  message: false
+bibliography: references.bib
+---
+
+::: {.callout-important collapse="true"}
+## Mode d'emploi du modèle (à supprimer avant le rendu final)
+
+- Ce document est le **rapport technique** du projet. Le résumé exécutif
+  (2 pages, pour un public non technique) est un document séparé : modèle
+  LaTeX `resume-executif.tex`, dans ce même dossier.
+- Remplacez le titre, le numéro du projet et les noms ci-dessus.
+- Indiquez le numéro de votre projet dans le bloc `configuration`
+  ci-dessous : les données correspondantes sont chargées automatiquement.
+- Les encadrés « Consigne » expliquent ce qui est attendu dans chaque
+  section : **supprimez-les** une fois la section rédigée.
+- Le rapport doit se produire **de bout en bout** avec le bouton *Render* de
+  RStudio (ou `quarto render rapport.qmd`), sans erreur, à partir des données
+  d'origine.
+- Rangez les fonctions réutilisables dans `R/fonctions.R`.
+:::
+
+```{r}
+#| label: configuration
+#| include: false
+
+# Numéro du projet (1 à 7, voir le document des projets)
+numero_projet <- 4
+
+library(tidyverse)
+library(knitr)
+
+source("R/fonctions.R")
+set.seed(2026)        # tirages aléatoires reproductibles (découpage, forêts...)
+theme_set(theme_minimal())
+```
+
+# Résumé {.unnumbered}
+
+::: {.callout-note}
+## Consigne
+
+Trois à cinq phrases : la question, les données, la méthode, le **résultat
+principal** (chiffré) et la **recommandation**, puis la principale limite.
+Rédigez cette partie en dernier.
+:::
+
+# Contexte et question
+
+::: {.callout-note}
+## Consigne
+
+- Présentez la situation et le **problème marketing**.
+- Formulez une **question précise**, à laquelle les données peuvent répondre.
+- Indiquez la **décision** que l'analyse doit éclairer et le **critère de
+  succès** (par exemple : « prédire la souscription mieux que le ciblage
+  actuel », « classer les leviers de satisfaction »).
+:::
+
+# Données
+
+## Origine et contenu
+
+::: {.callout-note}
+## Consigne
+
+D'où viennent les données ? Qui les a collectées, comment, quand, dans quel
+but ? Que représente une ligne ? Les données sont-elles réelles ou simulées ?
+Citez la source [par exemple, @yu2024].
+:::
+
+```{r}
+#| label: chargement
+donnees <- charger_donnees(numero_projet)
+dim(donnees)
+glimpse(donnees)
+```
+
+## Dictionnaire des variables
+
+::: {.callout-note}
+## Consigne
+
+Complétez la colonne *Description* : signification de chaque variable, unité,
+modalités. Pour un jeu de données très large, ne détaillez que les variables
+utilisées et décrivez les autres par groupes.
+:::
+
+```{r}
+#| label: tbl-dictionnaire
+#| tbl-cap: "Variables du jeu de données"
+tibble(
+  Variable = names(donnees),
+  Type = map_chr(donnees, \(x) class(x)[1]),
+  Description = "À compléter"
+) |>
+  head(25) |>
+  kable()
+```
+
+## Qualité des données
+
+::: {.callout-note}
+## Consigne
+
+Valeurs manquantes, doublons, valeurs aberrantes ou incohérentes,
+représentativité. Pour chaque problème : comment le traitez-vous, et
+pourquoi ?
+:::
+
+```{r}
+#| label: tbl-qualite
+#| tbl-cap: "Valeurs manquantes par variable (variables concernées uniquement)"
+manquants <- tibble(
+  Variable = names(donnees),
+  `Valeurs manquantes` = colSums(is.na(donnees)),
+  `Part (%)` = round(100 * colMeans(is.na(donnees)), 1)
+) |>
+  filter(`Valeurs manquantes` > 0)
+
+if (nrow(manquants) == 0) {
+  tibble(Résultat = "Aucune valeur manquante") |> kable()
+} else {
+  kable(manquants)
+}
+```
+
+Nombre de lignes en double : `r sum(duplicated(donnees))`.
+
+## Éthique et cadre légal
+
+::: {.callout-note}
+## Consigne
+
+Les données décrivent-elles des personnes ? Sont-elles identifiantes ? Un
+usage de vos résultats pourrait-il être discriminatoire ou intrusif
+(ciblage, prix, exclusion) ? Quelles précautions proposez-vous ?
+:::
+
+# Préparation des données
+
+::: {.callout-note}
+## Consigne
+
+Décrivez et justifiez chaque transformation : recodages, variables créées,
+traitement des valeurs manquantes, filtres. Ces choix peuvent influencer les
+résultats : notez-les pour en tester l'effet (section « Évaluation »).
+:::
+
+```{r}
+#| label: preparation
+donnees_propres <- donnees
+# Exemple : donnees_propres <- donnees |> mutate(...) |> filter(...)
+```
+
+**Découpage entraînement / test.** Pour un objectif de prédiction, réservez
+un jeu de test **avant** toute exploration, avec un découpage adapté
+(aléatoire, temporel ou par groupes).
+
+```{r}
+#| label: decoupage
+indices_train <- sample(nrow(donnees_propres), size = round(0.7 * nrow(donnees_propres)))
+train <- donnees_propres[indices_train, ]
+test  <- donnees_propres[-indices_train, ]
+c(entrainement = nrow(train), test = nrow(test))
+```
+
+# Exploration
+
+::: {.callout-note}
+## Consigne
+
+Analyses univariées puis bivariées, **sur le jeu d'entraînement**, orientées
+vers la question. Chaque graphique a un titre qui énonce son message, des axes
+avec unités, et il est **commenté** dans le texte (par exemple « la
+@fig-distributions montre que... »). Gardez les graphiques utiles, pas tous
+ceux que vous avez produits.
+:::
+
+```{r}
+#| label: fig-distributions
+#| fig-cap: "Distribution des variables quantitatives (12 premières au plus)"
+#| fig-height: 6
+quantitatives <- train |> select(where(is.numeric))
+if (ncol(quantitatives) > 0) {
+  quantitatives |>
+    select(1:min(12, ncol(quantitatives))) |>
+    pivot_longer(everything(), names_to = "variable", values_to = "valeur") |>
+    ggplot(aes(x = valeur)) +
+    geom_histogram(bins = 30, fill = "steelblue", color = "white") +
+    facet_wrap(vars(variable), scales = "free") +
+    labs(x = NULL, y = "Effectif")
+}
+```
+
+```{r}
+#| label: fig-correlations
+#| fig-cap: "Corrélations entre les variables quantitatives (12 premières au plus)"
+#| fig-height: 5.5
+if (ncol(quantitatives) >= 2) {
+  quantitatives |>
+    select(1:min(12, ncol(quantitatives))) |>
+    cor(use = "pairwise.complete.obs") |>
+    as.data.frame() |>
+    rownames_to_column("variable_1") |>
+    pivot_longer(-variable_1, names_to = "variable_2", values_to = "correlation") |>
+    ggplot(aes(variable_1, variable_2, fill = correlation)) +
+    geom_tile() +
+    geom_text(aes(label = round(correlation, 2)), size = 2.5) +
+    scale_fill_gradient2(limits = c(-1, 1)) +
+    labs(x = NULL, y = NULL, fill = "Corrélation") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+```
+
+# Modélisation
+
+::: {.callout-note}
+## Consigne
+
+- Commencez par un **modèle de référence** très simple (prédire la moyenne ou
+  la classe majoritaire).
+- Présentez ensuite les méthodes retenues et **justifiez** leur choix par
+  rapport à la question et au type des variables (régression, ANOVA, ACP,
+  arbres, forêts aléatoires, classification automatique...).
+- Interprétez les résultats dans les termes du problème marketing.
+
+Les blocs ci-dessous sont des **exemples** à adapter (ils ne sont pas
+exécutés : remplacez `#| eval: false` par `#| eval: true`).
+:::
+
+```{r}
+#| label: modele-regression
+#| eval: false
+# Exemple : prédire une variable quantitative `cible`
+reference <- mean(train$cible)
+modele_lineaire <- lm(cible ~ ., data = train)
+summary(modele_lineaire)
+
+library(randomForest)
+foret <- randomForest(cible ~ ., data = train, importance = TRUE)
+varImpPlot(foret)
+```
+
+```{r}
+#| label: modele-classification
+#| eval: false
+# Exemple : prédire une variable qualitative à deux modalités `cible`
+logistique <- glm(cible ~ ., data = train, family = binomial)
+summary(logistique)
+exp(coef(logistique))              # rapports de cotes
+
+library(rpart)
+arbre <- rpart(cible ~ ., data = train, method = "class")
+```
+
+```{r}
+#| label: modele-exploratoire
+#| eval: false
+# Exemple : résumer et segmenter (ACP puis classification)
+library(FactoMineR)
+library(factoextra)
+acp <- PCA(quantitatives, graph = FALSE)
+fviz_pca_var(acp)
+segments <- kmeans(scale(quantitatives), centers = 4, nstart = 25)
+```
+
+# Évaluation
+
+::: {.callout-note}
+## Consigne
+
+- **Prédictibilité** : performances sur le jeu de **test**, comparées au modèle
+  de référence (RMSE ; ou matrice de confusion, sensibilité, spécificité, AUC).
+- **Stabilité** : les conclusions changent-elles avec une autre graine, un autre
+  traitement des valeurs manquantes, une autre méthode ?
+- Résumez les performances dans un tableau.
+:::
+
+```{r}
+#| label: tbl-performances
+#| tbl-cap: "Performances des modèles sur le jeu de test"
+#| eval: false
+tibble(
+  Modèle = c("Référence (moyenne)", "Régression linéaire", "Forêt aléatoire"),
+  RMSE = c(rmse(test$cible, reference),
+           rmse(test$cible, predict(modele_lineaire, test)),
+           rmse(test$cible, predict(foret, test)))
+) |>
+  kable(digits = 2)
+```
+
+# Résultats et recommandations
+
+::: {.callout-note}
+## Consigne
+
+Le message principal en une phrase, puis des recommandations **concrètes,
+chiffrées et réalisables** pour l'équipe marketing, avec leur effet attendu.
+Exportez le graphique qui porte le message principal : il sera repris dans
+le résumé exécutif.
+:::
+
+```{r}
+#| label: figure-cle
+#| eval: false
+# Exemple : enregistrer le graphique principal pour le résumé exécutif
+ggsave("figures/figure-cle.pdf", plot = graphique_principal, width = 7, height = 3.5)
+```
+
+# Limites et perspectives
+
+::: {.callout-note}
+## Consigne
+
+Limites des données (représentativité, variables manquantes, données
+simulées), des méthodes (associations et non causalité, hypothèses), et ce
+que vous feriez avec plus de temps ou de données (par exemple : un test A/B).
+:::
+
+# Annexes {.unnumbered}
+
+## Contribution des membres du groupe {.unnumbered}
+
+| Membre | Contributions principales |
+|:-------|:--------------------------|
+| Prénom NOM | à compléter |
+| Prénom NOM | à compléter |
+| Prénom NOM | à compléter |
+| Prénom NOM | à compléter |
+
+## Environnement de calcul {.unnumbered}
+
+```{r}
+#| label: session
+sessionInfo()
+```
+
+## Références {.unnumbered}
+
+::: {#refs}
+:::

@@ -1,0 +1,179 @@
+% =============================================================================
+% Résumé exécutif — Projet Data Science sous R (ESME, 2026-2027)
+%
+% Document de 2 pages au maximum, destiné à un public NON technique
+% (direction marketing) : pas de code, pas de jargon statistique, des chiffres
+% utiles à la décision.
+%
+% Mode d'emploi :
+%   1. Remplacez chaque [À compléter] et supprimez les commentaires de consigne.
+%   2. Exportez depuis R le graphique qui porte votre message principal :
+%        ggsave("figures/figure-cle.pdf", width = 7, height = 3.5)
+%      Tant que ce fichier n'existe pas, un cadre de remplacement s'affiche.
+%   3. Compilez avec pdfLaTeX (RStudio : bouton « Compile PDF » ; ou Overleaf ;
+%      ou en ligne de commande : pdflatex resume-executif.tex).
+%   4. Vérifiez que le document tient en 2 pages : sinon, un avertissement
+%      s'affiche en bas de la dernière page.
+% =============================================================================
+
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=2cm, top=1.6cm, bottom=1.8cm]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+
+% ----------------------------------------------------------------------------
+% Informations à compléter
+% ----------------------------------------------------------------------------
+\newcommand{\numeroprojet}{X}
+\newcommand{\titreprojet}{[À compléter : titre qui énonce la question ou le message principal]}
+\newcommand{\membres}{Prénom NOM, Prénom NOM, Prénom NOM, Prénom NOM}
+\newcommand{\groupe}{Groupe X}
+
+% ----------------------------------------------------------------------------
+% Mise en forme (inutile de modifier)
+% ----------------------------------------------------------------------------
+\definecolor{principal}{HTML}{1565C0}
+\definecolor{fondencadre}{HTML}{E8F1FB}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\setlist{nosep, leftmargin=1.4em}
+\titleformat{\section}{\large\bfseries\color{principal}}{}{0em}{}
+\titlespacing*{\section}{0pt}{0.9em}{0.3em}
+\pagestyle{plain}
+
+\newtcolorbox{enbref}{enhanced, colback=fondencadre, colframe=principal,
+  boxrule=0pt, leftrule=4pt, arc=2pt, left=8pt, right=8pt, top=4pt, bottom=5pt,
+  title={En bref}, fonttitle=\bfseries, coltitle=principal,
+  colbacktitle=fondencadre, toptitle=3pt, bottomtitle=0pt}
+
+% Signale un dépassement de la limite de 2 pages en bas de la dernière page
+\AtEndDocument{%
+  \ifnum\value{page}>2
+    \par\vfill
+    \begin{center}\color{red}\bfseries
+      Attention : le résumé exécutif dépasse 2 pages (\thepage{} pages).
+    \end{center}
+    \typeout{ATTENTION : le resume executif depasse 2 pages.}
+  \fi}
+
+\begin{document}
+
+% ----------------------------------------------------------------------------
+% En-tête
+% ----------------------------------------------------------------------------
+{\small\color{gray} Data Science sous R — ESME, Ingé3 2026-2027 \hfill
+ Projet n°\,\numeroprojet{} — \groupe}
+
+\vspace{0.4em}
+{\LARGE\bfseries\color{principal} \titreprojet\par}
+\vspace{0.3em}
+{\small \membres{} \hfill \today}
+
+\vspace{0.2em}
+\rule{\linewidth}{0.4pt}
+
+% ----------------------------------------------------------------------------
+\begin{enbref}
+% Consigne : les trois messages à retenir si le lecteur ne lit que cet encadré.
+% Une phrase chacun, avec un chiffre.
+\begin{itemize}
+  \item \textbf{[Constat principal]} : [À compléter, avec un chiffre clé].
+  \item \textbf{[Deuxième résultat]} : [À compléter].
+  \item \textbf{[Recommandation principale]} : [À compléter, avec l'effet attendu].
+\end{itemize}
+\end{enbref}
+
+% ----------------------------------------------------------------------------
+\section{Le contexte et la question}
+% Consigne : 3 à 4 phrases. Quel problème marketing ? Quelle décision doit être
+% prise ? Quelle question précise avons-nous étudiée ?
+[À compléter : situation de l'entreprise, enjeu, question posée et décision
+que l'analyse doit éclairer.]
+
+% ----------------------------------------------------------------------------
+\section{Ce que nous avons fait}
+% Consigne : en langage courant, sans nom de méthode ni de package. Par exemple
+% « nous avons comparé les ventes de 400 magasins » plutôt que « régression
+% linéaire multiple ». Précisez la source et la taille des données.
+\begin{itemize}
+  \item \textbf{Données :} [À compléter : quoi, combien, quelle période, quelle
+        source ; réelles ou simulées].
+  \item \textbf{Démarche :} [À compléter : ce que nous avons comparé, mesuré ou
+        prédit, en une ou deux phrases].
+  \item \textbf{Fiabilité :} [À compléter : par exemple « vérifié sur des clients
+        non utilisés pour construire le modèle »].
+\end{itemize}
+
+% ----------------------------------------------------------------------------
+\section{Les principaux résultats}
+% Consigne : 3 à 4 résultats, du plus important au moins important, chacun
+% chiffré et traduit en conséquence pour l'entreprise.
+\begin{enumerate}
+  \item \textbf{[Résultat 1].} [À compléter : chiffre clé et ce qu'il signifie
+        pour l'entreprise.]
+  \item \textbf{[Résultat 2].} [À compléter.]
+  \item \textbf{[Résultat 3].} [À compléter.]
+\end{enumerate}
+
+% Consigne : UN graphique, celui qui porte le message principal. Son titre
+% énonce le message ; les axes ont des unités ; une phrase le commente.
+\begin{figure}[h]
+  \centering
+  \IfFileExists{figures/figure-cle.pdf}{%
+    \includegraphics[width=0.85\linewidth]{figures/figure-cle.pdf}%
+  }{%
+    \fbox{\parbox[c][4cm][c]{0.8\linewidth}{\centering\color{gray}
+      Graphique principal à exporter depuis R :\\[0.3em]
+      \texttt{ggsave("figures/figure-cle.pdf", width = 7, height = 3.5)}}}%
+  }
+  \caption{[À compléter : le message du graphique en une phrase.]}
+\end{figure}
+
+% ----------------------------------------------------------------------------
+\section{Nos recommandations}
+% Consigne : des actions concrètes et réalisables, avec leur effet attendu
+% (chiffré si possible), leur coût ou leur difficulté, et une priorité.
+\begin{center}
+\rowcolors{2}{fondencadre}{white}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}X
+                             >{\raggedright\arraybackslash}p{4.2cm}
+                             >{\centering\arraybackslash}p{1.8cm}}
+  \toprule
+  \textbf{Action recommandée} & \textbf{Effet attendu} & \textbf{Priorité} \\
+  \midrule
+  % Ne commencez pas une ligne du tableau par « [ » : LaTeX le lirait comme
+  % un argument de la commande précédente (\\ ou \midrule).
+  Action 1 : à compléter & Effet attendu : à compléter & Haute \\
+  Action 2 : à compléter & Effet attendu : à compléter & Moyenne \\
+  Action 3 : à compléter & Effet attendu : à compléter & Basse \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+% ----------------------------------------------------------------------------
+\section{Limites et prochaines étapes}
+% Consigne : soyez honnêtes sur ce que l'analyse ne permet pas de conclure
+% (données, association et non causalité...) et proposez la suite : données à
+% collecter, test A/B pour confirmer un effet, suivi d'indicateurs.
+\begin{itemize}
+  \item \textbf{Limites :} [À compléter.]
+  \item \textbf{Prochaines étapes :} [À compléter.]
+\end{itemize}
+
+\vfill
+{\small\color{gray} Le détail des analyses figure dans le rapport technique du
+groupe.}
+
+\end{document}
