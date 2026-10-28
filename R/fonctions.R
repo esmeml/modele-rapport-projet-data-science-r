@@ -33,11 +33,11 @@ charger_donnees <- function(projet) {
 }
 
 # Projet 5 : les fichiers CSV de la boutique en ligne doivent être placés dans
-# le dossier donnees/ (voir donnees/LISEZMOI.md).
+# le dossier donnees/ (voir donnees/README.md).
 lire_boutique <- function(table) {
   chemin <- file.path("donnees", paste0("boutique_", table, ".csv"))
   if (!file.exists(chemin)) {
-    stop("Fichier introuvable : ", chemin, " (voir donnees/LISEZMOI.md)", call. = FALSE)
+    stop("Fichier introuvable : ", chemin, " (voir donnees/README.md)", call. = FALSE)
   }
   utils::read.csv(chemin, fileEncoding = "UTF-8")
 }

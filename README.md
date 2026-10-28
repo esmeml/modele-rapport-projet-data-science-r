@@ -7,7 +7,7 @@ Modèles pour les deux documents écrits du projet :
 
 ## Utilisation
 
-1. Copiez tout le dossier `modele-rapport` et renommez-le (par exemple projet-groupe-3`).
+1. Copiez tout le dossier `modele-rapport` et renommez-le (par exemple `projet-groupe-3`).
 2. Ouvrez `modele-rapport.Rproj` dans RStudio : le répertoire de travail est alors le dossier du projet.
 3. Installez les packages nécessaires :
    - pour tous : `install.packages(c("tidyverse", "knitr", "rmarkdown"))` ;

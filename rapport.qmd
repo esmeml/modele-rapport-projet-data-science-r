@@ -29,6 +29,11 @@ execute:
   warning: false
   message: false
 bibliography: references.bib
+crossref:              # libellés en français : « tableau 1 », « figure 2 »
+  fig-title: Figure
+  tbl-title: Tableau
+  fig-prefix: figure
+  tbl-prefix: tableau
 ---
 
 ::: {.callout-important collapse="true"}
